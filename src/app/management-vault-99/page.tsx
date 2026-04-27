@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 import { Shield, Users, ArrowLeftRight, Landmark, CreditCard, Clock, Search } from "lucide-react";
 import Link from "next/link";
 
+export const dynamic = 'force-dynamic';
+
 export default async function ManagementVault() {
   const [users, txs] = await Promise.all([
     prisma.user.findMany({ orderBy: { created_at: 'desc' } }),
