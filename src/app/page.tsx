@@ -5,6 +5,8 @@ import { ArrowUpRight, ArrowDownLeft, QrCode, ArrowRight, Shield, Zap, Gift, Wal
 import { LandingPage } from "@/components/LandingPage";
 import PinOverlay from "@/components/PinOverlay";
 
+export const dynamic = 'force-dynamic';
+
 export default async function Home() {
   const session = await getSession();
   
