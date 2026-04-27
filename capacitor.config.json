@@ -1,0 +1,12 @@
+{
+  "appId": "com.okwebank.app",
+  "appName": "OkweBank",
+  "webDir": "out",
+  "server": {
+    "url": "https://okwebank.vercel.app",
+    "cleartext": true
+  },
+  "android": {
+    "allowMixedContent": true
+  }
+}
