@@ -13,6 +13,7 @@ model User {
   username      String   @unique
   upi_id        String   @unique
   password_hash String
+  pin_hash      String?  // NEW: 4-digit secure PIN
   balance       Float    @default(0.0)
   trust_score   Int      @default(100)
   created_at    DateTime @default(now())
