@@ -1,8 +1,9 @@
-import { getSession } from "@/lib/auth";
+import { getSession, logout } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { User, ShieldCheck, LogOut, ShieldAlert, Settings } from "lucide-react";
+import { User, ShieldCheck, LogOut, ShieldAlert, Settings, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import LogoutButton from "./LogoutButton";
+import { redirect } from "next/navigation";
 
 export const dynamic = 'force-dynamic';
 
@@ -10,21 +11,22 @@ export default async function Profile() {
   const session = await getSession();
   
   if (!session) {
-    return null;
+    redirect("/login");
   }
 
   const user = await prisma.user.findUnique({
     where: { id: session.userId },
   });
 
+  // If session exists but user was deleted from DB (e.g. after reset)
   if (!user) {
-    return null;
+    redirect("/login");
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-white dark:bg-black px-4 pt-12 pb-24 transition-colors duration-300 text-slate-900 dark:text-white">
+    <div className="flex flex-col min-h-screen bg-white dark:bg-black px-4 pt-12 pb-24 transition-colors duration-300 text-slate-900 dark:text-white font-sans">
       <div className="flex items-center mb-8 px-2">
-        <h1 className="text-2xl font-[1000] uppercase italic tracking-tighter">My Account</h1>
+        <h1 className="text-2xl font-[1000] uppercase italic tracking-tighter text-indigo-600">My Account</h1>
       </div>
 
       <div className="flex flex-col items-center mb-10">
@@ -44,7 +46,7 @@ export default async function Profile() {
           alt="My UPI QR Code"
           className="w-44 h-44 mb-4 relative z-10 group-hover:scale-105 transition-transform duration-500"
         />
-        <p className="text-slate-400 text-[9px] font-black uppercase tracking-[0.2em] relative z-10">Hold to download QR</p>
+        <p className="text-slate-400 text-[9px] font-black uppercase tracking-[0.2em] relative z-10">Scan to pay me</p>
       </div>
 
       <div className="space-y-3 mb-10">
@@ -74,5 +76,3 @@ export default async function Profile() {
     </div>
   );
 }
-
-import { ChevronRight } from "lucide-react";

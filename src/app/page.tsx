@@ -1,9 +1,10 @@
-import { getSession } from "@/lib/auth";
+import { getSession, logout } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { ArrowUpRight, ArrowDownLeft, QrCode, ArrowRight, Shield, Zap, Gift, Wallet, BarChart3, Users, Settings } from "lucide-react";
 import { LandingPage } from "@/components/LandingPage";
 import PinOverlay from "@/components/PinOverlay";
+import { redirect } from "next/navigation";
 
 export const dynamic = 'force-dynamic';
 
@@ -18,6 +19,7 @@ export default async function Home() {
     where: { id: session.userId },
   });
 
+  // Handle case where session exists but user was deleted from DB
   if (!user) {
     return <LandingPage />;
   }
@@ -39,7 +41,7 @@ export default async function Home() {
   });
 
   return (
-    <div className="flex flex-col min-h-screen bg-white dark:bg-black transition-colors duration-300 font-sans pb-32">
+    <div className="flex flex-col min-h-screen bg-white dark:bg-black transition-colors duration-300 font-sans pb-32 text-slate-900 dark:text-white">
       {/* 1. TOP NAVIGATION / GREETING */}
       <div className="px-6 pt-12 mb-8 flex items-center justify-between">
         <div>
@@ -53,12 +55,12 @@ export default async function Home() {
 
       {/* 2. MAIN WALLET SECTION */}
       <section className="px-6 mb-10">
-          <div className="bg-slate-900 dark:bg-zinc-900 rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden group">
+          <div className="bg-slate-900 dark:bg-zinc-900 rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden group border border-indigo-500/10">
               <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:rotate-12 transition-transform duration-700">
                   <Wallet size={80} />
               </div>
               <div className="relative z-10">
-                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400 mb-2">Total Liquidity</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400 mb-2 font-mono">Total Liquidity</p>
                   <h2 className="text-5xl font-[1000] tracking-tighter mb-6">₹{user.balance.toFixed(2)}</h2>
                   <div className="flex items-center gap-2 text-zinc-400 font-mono text-[10px] bg-black/20 w-fit px-3 py-1.5 rounded-full border border-white/5">
                       <Zap size={10} className="text-yellow-500" /> {user.upi_id}
@@ -70,7 +72,7 @@ export default async function Home() {
       {/* 3. ACTION GRID */}
       <section className="px-6 mb-10">
           <p className="text-[10px] font-black text-slate-400 dark:text-zinc-600 uppercase tracking-widest ml-2 mb-4">Core Commands</p>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4 text-white">
               <ActionCard 
                 href="/send" 
                 icon={<ArrowUpRight size={20} />} 
@@ -89,13 +91,13 @@ export default async function Home() {
       </section>
 
       {/* 4. ACCOUNT HEALTH SECTION */}
-      <section className="px-6 mb-10">
+      <section className="px-6 mb-10 text-white">
           <div className="bg-slate-50 dark:bg-zinc-900/50 rounded-[2rem] p-6 border border-slate-100 dark:border-zinc-900 grid grid-cols-2 gap-6">
-              <div className="border-r border-slate-200 dark:border-zinc-800">
+              <div className="border-r border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-white">
                   <p className="text-[9px] font-black text-slate-400 uppercase tracking-tighter mb-1">Trust Score</p>
-                  <p className="text-xl font-black text-slate-900 dark:text-white">{user.trust_score}%</p>
+                  <p className="text-xl font-black">{user.trust_score}%</p>
               </div>
-              <div>
+              <div className="text-slate-900 dark:text-white">
                   <p className="text-[9px] font-black text-slate-400 uppercase tracking-tighter mb-1">Network Status</p>
                   <div className="flex items-center gap-1.5 text-green-500 font-black text-[10px] uppercase">
                       <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-ping"></div> Active
@@ -121,13 +123,13 @@ export default async function Home() {
             recentTransactions.map((tx: any) => {
               const isSent = tx.from_upi === user.upi_id;
               return (
-                <div key={tx.txn_id} className="flex items-center justify-between p-5 rounded-3xl bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 shadow-sm transition-all hover:border-indigo-100">
-                  <div className="flex items-center gap-4">
+                <div key={tx.txn_id} className="flex items-center justify-between p-5 rounded-3xl bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 shadow-sm transition-all hover:border-indigo-100 group">
+                  <div className="flex items-center gap-4 text-slate-900 dark:text-white">
                     <div className={`h-10 w-10 rounded-2xl flex items-center justify-center ${isSent ? 'bg-slate-50 dark:bg-black text-slate-400' : 'bg-green-50 dark:bg-green-900/20 text-green-600'}`}>
                       {isSent ? <ArrowUpRight size={18} /> : <ArrowDownLeft size={18} />}
                     </div>
-                    <div>
-                      <p className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tighter truncate max-w-[120px]">
+                    <div className="text-slate-900 dark:text-white">
+                      <p className="text-xs font-black uppercase tracking-tighter truncate max-w-[120px]">
                         {isSent ? `${tx.to_upi}` : `${tx.from_upi}`}
                       </p>
                       <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
